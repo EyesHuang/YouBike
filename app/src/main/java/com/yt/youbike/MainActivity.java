@@ -9,18 +9,16 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recycler;
@@ -71,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            JSONObject jonObject = null;
+            /*JSONObject jonObject = null;
             List<Bike> bikes = new ArrayList<>();
 
             try {
@@ -101,7 +99,36 @@ public class MainActivity extends AppCompatActivity {
 
             } catch (JSONException e) {
                 e.printStackTrace();
+            }*/
+
+
+            Gson gson = new Gson();
+            Type listType = new TypeToken<Station>(){}.getType();
+            Station station = gson.fromJson(result, listType);
+            Result stationResult = station.getResult();
+            Records[] records = stationResult.getRecords();
+            int index = 0;
+
+            for (Records record: records) {
+                String name = record.getName();
+                String address = record.getAddress();
+                String totalNumber = record.getTotalNumber();
+                String lendNumber = record.getLendNumber();
+                String returnNumber = record.getReturnNumber();
+                String latitude = record.getLatitude();
+                String longitude = record.getLongitude();
+                records[index] = new Records(name, address,
+                        totalNumber, lendNumber,
+                        returnNumber, latitude, longitude);
+                index++;
+
+                Log.d(TAG, "AsyncTask onPostExecute: " +
+                        index + name + address+ totalNumber +
+                        lendNumber + returnNumber +
+                        latitude + longitude);
             }
+
+            recycler.setAdapter(new StationAdapter(station));
 
 
         }
